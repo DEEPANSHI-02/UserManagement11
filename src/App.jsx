@@ -1,35 +1,119 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'react-hot-toast';
+import { useAuth } from './hooks/useAuth';
+import LoginPage from './pages/LoginPage';
+import DashboardLayout from './components/layout/DashboardLayout';
+import Dashboard from './pages/Dashboard';
+import TenantManagement from './pages/TenantManagement';
+import UserManagement from './pages/UserManagement'; 
+import OrganizationManagement from './pages/OrganizationManagement';
+import { 
+  RoleManagement,
+  PrivilegeManagement,
+  LegalEntityManagement,
+  Profile,
+  SettingsPage
+} from './pages/PlaceholderPages';
+import LoadingSpinner from './components/common/LoadingSpinner';
+import './App.css';
 
+/**
+ * Protected Route Component
+ * Redirects to login if user is not authenticated
+ */
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+  
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
+
+/**
+ * Public Route Component  
+ * Redirects to dashboard if user is already authenticated
+ */
+const PublicRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+  
+  return !isAuthenticated ? children : <Navigate to="/dashboard" replace />;
+};
+
+/**
+ * Main Application Component
+ * Handles routing and global layout
+ */
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <Router>
+      <div className="App">
+        <Routes>
+          {/* Public Routes */}
+          <Route 
+            path="/login" 
+            element={
+              <PublicRoute>
+                <LoginPage />
+              </PublicRoute>
+            } 
+          />
+          
+          {/* Protected Routes */}
+          <Route 
+            path="/*" 
+            element={
+              <ProtectedRoute>
+                <DashboardLayout>
+                  <Routes>
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/tenants" element={<TenantManagement />} />
+                    <Route path="/organizations" element={<OrganizationManagement />} />
+                    <Route path="/users" element={<UserManagement />} />
+                    <Route path="/roles" element={<RoleManagement />} />
+                    <Route path="/privileges" element={<PrivilegeManagement />} />
+                    <Route path="/legal-entities" element={<LegalEntityManagement />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/settings" element={<SettingsPage />} />
+                  </Routes>
+                </DashboardLayout>
+              </ProtectedRoute>
+            } 
+          />
+        </Routes>
+        
+        {/* Global Toast Notifications */}
+        <Toaster
+          position="top-right"
+          reverseOrder={false}
+          gutter={8}
+          containerClassName=""
+          containerStyle={{}}
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#363636',
+              color: '#fff',
+            },
+            success: {
+              duration: 3000,
+              theme: {
+                primary: 'green',
+                secondary: 'black',
+              },
+            },
+          }}
+        />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </Router>
+  );
 }
 
-export default App
+export default App;
