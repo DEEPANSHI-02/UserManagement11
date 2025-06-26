@@ -170,6 +170,20 @@ class MockApiService {
     };
   }
 
+  async deleteTenant(id) {
+    await this.delay();
+    const tenantIndex = mockData.tenants.findIndex(t => t.id === id);
+    if (tenantIndex === -1) {
+      throw new Error('Tenant not found');
+    }
+    mockData.tenants.splice(tenantIndex, 1);
+    return {
+      success: true,
+      message: 'Tenant deleted successfully',
+      trace_id: this.generateId()
+    };
+  }
+
   // ==================== ORGANIZATION MANAGEMENT APIs ====================
   async getOrganizations(tenantId, filters = {}) {
     await this.delay();
@@ -466,6 +480,60 @@ class MockApiService {
   async saveSecuritySettings(userId, settings) {
     setPersisted('userSecuritySettings', settings);
     return { status: 200, data: { success: true } };
+  }
+
+  async createRole(tenantId, roleData) {
+    await this.delay();
+    const newRole = {
+      id: this.generateId('role-'),
+      tenant_id: tenantId,
+      ...roleData,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    mockData.roles.push(newRole);
+    return {
+      success: true,
+      data: newRole,
+      message: 'Role created successfully',
+      trace_id: this.generateId()
+    };
+  }
+
+  async updateRole(roleId, roleData) {
+    await this.delay();
+    const idx = mockData.roles.findIndex(r => r.id === roleId);
+    if (idx === -1) throw new Error('Role not found');
+    mockData.roles[idx] = {
+      ...mockData.roles[idx],
+      ...roleData,
+      updated_at: new Date().toISOString()
+    };
+    return {
+      success: true,
+      data: mockData.roles[idx],
+      message: 'Role updated successfully',
+      trace_id: this.generateId()
+    };
+  }
+
+  async deleteRole(roleId) {
+    await this.delay();
+    const idx = mockData.roles.findIndex(r => r.id === roleId);
+    if (idx === -1) throw new Error('Role not found');
+    mockData.roles.splice(idx, 1);
+    return {
+      success: true,
+      message: 'Role deleted successfully',
+      trace_id: this.generateId()
+    };
+  }
+
+  async getRolePrivileges(roleId) {
+    await this.delay();
+    const rolePrivs = mockData.rolePrivileges.filter(rp => rp.role_id === roleId);
+    const privileges = rolePrivs.map(rp => mockData.privileges.find(p => p.id === rp.privilege_id)).filter(Boolean);
+    return { success: true, data: privileges };
   }
 }
 
