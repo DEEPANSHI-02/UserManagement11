@@ -15,7 +15,9 @@ import {
   UserCheck,
   Monitor,
   Zap,
-  Bell
+  Bell,
+  Clock,
+  Activity
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -73,15 +75,15 @@ const RoleBasedNavigation = () => {
     },
     {
       name: 'API Management',
-      href: '/system/api',
+      href: '/system/api-management',
       icon: Zap,
-      current: location.pathname === '/system/api'
+      current: location.pathname === '/system/api-management'
     },
     {
       name: 'Global Reports',
-      href: '/system/reports',
+      href: '/system/global-reports',
       icon: BarChart3,
-      current: location.pathname === '/system/reports'
+      current: location.pathname === '/system/global-reports'
     }
   ];
 
@@ -168,6 +170,30 @@ const RoleBasedNavigation = () => {
       href: '/legal-entities',
       icon: FileText,
       current: location.pathname === '/legal-entities'
+    },
+    {
+      name: 'Roles & Privileges',
+      href: '/roles-privileges',
+      icon: Shield,
+      current: location.pathname === '/roles-privileges'
+    },
+    {
+      name: 'Sessions',
+      href: '/sessions',
+      icon: Clock,
+      current: location.pathname === '/sessions'
+    },
+    {
+      name: 'Activity',
+      href: '/activity',
+      icon: Activity,
+      current: location.pathname === '/activity'
+    },
+    {
+      name: 'Security',
+      href: '/security',
+      icon: Shield,
+      current: location.pathname === '/security'
     },
     {
       name: 'My Settings',
