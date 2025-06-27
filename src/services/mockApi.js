@@ -535,6 +535,29 @@ class MockApiService {
     const privileges = rolePrivs.map(rp => mockData.privileges.find(p => p.id === rp.privilege_id)).filter(Boolean);
     return { success: true, data: privileges };
   }
+
+  async updateRolePrivileges(roleId, privIds) {
+    await this.delay();
+    // Remove all existing privileges for the role
+    mockData.rolePrivileges = mockData.rolePrivileges.filter(rp => rp.role_id !== roleId);
+    // Add new privileges
+    const grantedBy = this.currentUser ? this.currentUser.id : 1;
+    const grantedAt = new Date().toISOString();
+    privIds.forEach(privId => {
+      mockData.rolePrivileges.push({
+        id: this.generateId(),
+        role_id: roleId,
+        privilege_id: privId,
+        granted_by: grantedBy,
+        granted_at: grantedAt
+      });
+    });
+    return {
+      success: true,
+      message: 'Role privileges updated successfully',
+      trace_id: this.generateId()
+    };
+  }
 }
 
 // Create single instance
