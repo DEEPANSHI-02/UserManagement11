@@ -492,6 +492,7 @@ class MockApiService {
       updated_at: new Date().toISOString()
     };
     mockData.roles.push(newRole);
+    setPersistedEntity('roles', mockData.roles);
     return {
       success: true,
       data: newRole,
@@ -509,6 +510,7 @@ class MockApiService {
       ...roleData,
       updated_at: new Date().toISOString()
     };
+    setPersistedEntity('roles', mockData.roles);
     return {
       success: true,
       data: mockData.roles[idx],
@@ -522,6 +524,7 @@ class MockApiService {
     const idx = mockData.roles.findIndex(r => r.id === roleId);
     if (idx === -1) throw new Error('Role not found');
     mockData.roles.splice(idx, 1);
+    setPersistedEntity('roles', mockData.roles);
     return {
       success: true,
       message: 'Role deleted successfully',
@@ -538,9 +541,7 @@ class MockApiService {
 
   async updateRolePrivileges(roleId, privIds) {
     await this.delay();
-    // Remove all existing privileges for the role
     mockData.rolePrivileges = mockData.rolePrivileges.filter(rp => rp.role_id !== roleId);
-    // Add new privileges
     const grantedBy = this.currentUser ? this.currentUser.id : 1;
     const grantedAt = new Date().toISOString();
     privIds.forEach(privId => {
@@ -552,6 +553,7 @@ class MockApiService {
         granted_at: grantedAt
       });
     });
+    setPersistedEntity('rolePrivileges', mockData.rolePrivileges);
     return {
       success: true,
       message: 'Role privileges updated successfully',
@@ -643,3 +645,19 @@ mockApi.updateLegalEntity = async (entityId, entityData) => {
   }
   return { status: 404 };
 };
+
+// --- Persistence Helpers for All Entities ---
+function getPersistedEntity(key, fallback) {
+  const data = localStorage.getItem(key);
+  return data ? JSON.parse(data) : fallback;
+}
+function setPersistedEntity(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+// --- Patch mockData to use persisted data on load ---
+mockData.roles = getPersistedEntity('roles', mockData.roles);
+mockData.privileges = getPersistedEntity('privileges', mockData.privileges);
+mockData.users = getPersistedEntity('users', mockData.users);
+mockData.organizations = getPersistedEntity('organizations', mockData.organizations);
+mockData.rolePrivileges = getPersistedEntity('rolePrivileges', mockData.rolePrivileges);
